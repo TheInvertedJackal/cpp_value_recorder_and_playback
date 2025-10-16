@@ -9,13 +9,12 @@ using namespace std;
 
 const double ns_in_ms = 1000000;
 
-void thread_function(string file_path, double sample_rate, bool* is_recording, double* address_to_record){
-    std::ofstream outputFile(file_path, std::ios::out | std::ios::binary);
-    if (outputFile.is_open()){
+void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_recording, double* address_to_record){
+    if (outputFile->is_open()){
         const char double_size = sizeof(double);
-        outputFile.write(reinterpret_cast<const char*>(&double_size), sizeof(const char));
-        outputFile.write(reinterpret_cast<const char*>(&sample_rate), sizeof(double));
-        outputFile.flush();
+        outputFile->write(reinterpret_cast<const char*>(&double_size), sizeof(const char));
+        outputFile->write(reinterpret_cast<const char*>(&sample_rate), sizeof(double));
+        outputFile->flush();
         int flush_every_this = static_cast<int>(500 / sample_rate); // Flush every half a second.
         long long count = 0;
         while(is_recording){
@@ -26,9 +25,9 @@ void thread_function(string file_path, double sample_rate, bool* is_recording, d
             long long rec_time = timeutils::get_current_nano_time();
 
             // print value (and flush buffer every so often)
-            outputFile.write(reinterpret_cast<const char*>(&value), sizeof(double));
+            outputFile->write(reinterpret_cast<const char*>(&value), sizeof(double));
             count++;
-            if (count % flush_every_this == 0) outputFile.flush();
+            if (count % flush_every_this == 0) outputFile->flush();
 
             // Sleep for remaining time if needed
             long long post_write = timeutils::get_current_nano_time();
@@ -36,7 +35,7 @@ void thread_function(string file_path, double sample_rate, bool* is_recording, d
             long long sleep_time = static_cast<long long>(sample_rate * ns_in_ms) - work_time;
             if(sleep_time > 0) std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
         }
-        outputFile.close();
+        outputFile->close();
     } else {
         cerr << "There was an error opening the file to record values too." << endl;
     }
@@ -47,7 +46,7 @@ RecordValue::RecordValue(double* address_to_record, double record_interval, std:
     if(record_interval < 0) throw std::runtime_error("Rate cannot be less than 0!");
     this->address_to_record = address_to_record;
     this->sample_rate = record_interval;
-    this->file_to_write_to = record_file;
+    this->file_to_write_to = new std::ofstream(record_file, std::ios::out | std::ios::binary);
     this->is_recording = false;
 }
 
@@ -65,4 +64,5 @@ void RecordValue::stop_recording(){
     if(!is_recording) return;
     is_recording = false;
     work_thread.join();
+    delete file_to_write_to;
 }
