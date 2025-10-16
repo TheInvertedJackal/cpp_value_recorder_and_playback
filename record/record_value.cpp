@@ -16,13 +16,15 @@ void thread_function(string file_path, double sample_rate, bool* is_recording, d
         outputFile.write(reinterpret_cast<const char*>(&double_size), sizeof(const char));
         outputFile.write(reinterpret_cast<const char*>(&sample_rate), sizeof(double));
         outputFile.flush();
-        int flush_every_this = 100;
+        int flush_every_this = static_cast<int>(500 / sample_rate); // Flush every half a second.
         long long count = 0;
         while(is_recording){
             // record value
             double value = *(address_to_record);
+
             // take current time
             long long rec_time = timeutils::get_current_nano_time();
+
             // print value (and flush buffer every so often)
             outputFile.write(reinterpret_cast<const char*>(&value), sizeof(double));
             count++;
@@ -32,7 +34,7 @@ void thread_function(string file_path, double sample_rate, bool* is_recording, d
             long long post_write = timeutils::get_current_nano_time();
             long long work_time = post_write - rec_time;
             long long sleep_time = static_cast<long long>(sample_rate * ns_in_ms) - work_time;
-            if(sleep_time > 0) std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+            if(sleep_time > 0) std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
         }
         outputFile.close();
     } else {
@@ -44,7 +46,7 @@ RecordValue::RecordValue(double* address_to_record, double record_interval, std:
     if(address_to_record == nullptr) throw std::runtime_error("Cannot read from a null pointer!");
     if(record_interval < 0) throw std::runtime_error("Rate cannot be less than 0!");
     this->address_to_record = address_to_record;
-    this->sample_rate = sample_rate;
+    this->sample_rate = record_interval;
     this->file_to_write_to = record_file;
     this->is_recording = false;
 }

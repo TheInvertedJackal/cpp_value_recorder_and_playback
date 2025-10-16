@@ -9,7 +9,7 @@ if "%1" == "record" (
 
 if "%1" == "read" (
     @echo on
-    g++ read_file.cpp -o read
+    g++ read\read_file.cpp -o read
     @echo off
     goto exit
 )
