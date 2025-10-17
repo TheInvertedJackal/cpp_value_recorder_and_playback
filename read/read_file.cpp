@@ -2,6 +2,8 @@
 #include<string>
 #include<fstream>
 
+#include "../bin_struct/playback_bin.hpp"
+
 using namespace std;
 
 /*
@@ -33,6 +35,7 @@ main(int argc, char* argv[]){
         inputFile.seekg(0, std::ios::end); // Move to end of file
         long fileSize = inputFile.tellg(); // Get current position (file size in bytes)
         inputFile.seekg(0, std::ios::beg);
+        playback_header header;
         unsigned char read_size;
         inputFile.read(reinterpret_cast<char*>(&read_size), sizeof(unsigned char));
         cout << "Read size: " << static_cast<int>(read_size) << endl;
