@@ -21,7 +21,7 @@ void thread_function(thread_data* data){
     int doubles_in_buff = 1024;
     double* buffer = new double[doubles_in_buff]; // Create buffer
 
-    int total_doubles = (data->file_size - sizeof(playback_header)) / sizeof(double);
+    int total_doubles = static_cast<int>((data->file_size - sizeof(playback_header)) / sizeof(double));
     int read_doubles = 0;
     int played_doubles = 0;
 
@@ -31,19 +31,18 @@ void thread_function(thread_data* data){
         long long end_time = timeutils::get_current_nano_time();
         long long rest_time_ns = static_cast<long long>(data->refresh_rate * timeutils::ns_in_ms) - (end_time - start_time);
         int double_index = 0;
-        while(played_doubles > read_doubles && *(data->playing)){
-            if(rest_time_ns > 0) std::this_thread::sleep_for(std::chrono::nanoseconds(rest_time_ns));
+        // cout << "Batch Read! Total: " << total_doubles << " Read: " << read_doubles << " Played Doubles: " << played_doubles << endl;
+        while(read_doubles > played_doubles && *(data->playing)){
             *(data->value_to_change) = buffer[double_index];
             double_index += 1;
-            read_doubles += 1;
+            played_doubles += 1;
+            if(rest_time_ns > 0) std::this_thread::sleep_for(std::chrono::nanoseconds(rest_time_ns));
             rest_time_ns = data->refresh_rate * timeutils::ns_in_ms;
-            cout << "Changed!" << endl;
+            // cout << "Changed!" << endl;
         }
-        cout << "Bath Read!" << endl;
     }
     if(*(data->playing)) *(data->finished_reading) = true;
     delete[] buffer;
-    delete data;
     *(data->playing) = false;
 }
 
@@ -74,13 +73,17 @@ void PlaybackValue::load_file(std::string file_loc){
     file_to_read->read(reinterpret_cast<char*>(&header), sizeof(playback_header));
     if(header.double_size != sizeof(double)) throw std::runtime_error("The expected double size and the system arch double size don't align!");
     refresh_rate = header.refresh_rate;
+    // cout << "File Loaded: " << static_cast<int>(header.double_size) << " | " << header.refresh_rate << endl; 
+
+    to_thread = get_thread_package();
 }
 
 void PlaybackValue::start_playback(){
     if(is_playing) return;
     is_playing = true;
     finished_reading = false;
-    work_thread = thread(thread_function, get_thread_package());
+    thread work_thread = thread(thread_function, to_thread);
+    work_thread.detach();
 }
 
 thread_data* PlaybackValue::get_thread_package(){
@@ -97,7 +100,6 @@ thread_data* PlaybackValue::get_thread_package(){
 void PlaybackValue::stop_playback(){
     if(!is_playing) return;
     is_playing = false;
-    work_thread.join();
 }
 
 void PlaybackValue::restart_playback(){

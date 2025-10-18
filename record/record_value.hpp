@@ -10,7 +10,6 @@ namespace CPP_Value_Manipulation{
             double* address_to_record;
             double sample_rate;
             std::ofstream* file_to_write_to;
-            std::thread work_thread;
             bool is_recording;
         public:
             // The Address of the value to record, the sample rate in milliseconds and the file to record the values too

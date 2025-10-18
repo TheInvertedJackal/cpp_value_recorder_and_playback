@@ -18,12 +18,12 @@ namespace CPP_Value_Manipulation{
     class PlaybackValue{
         private:
             double* value_to_manipulate;
-            std::thread work_thread;
             std::ifstream* file_to_read;
             bool is_playing;
             bool finished_reading;
             long file_size;
             double refresh_rate;
+            thread_data* to_thread;
             void load_file(std::string file_loc);
             thread_data* get_thread_package();
         public:
@@ -35,6 +35,7 @@ namespace CPP_Value_Manipulation{
             void stop_playback();
             // Restarts the playback, even if not finished
             void restart_playback();
+            // Determines if the playback has stopped on it's own. Used for a possible reset.
             bool is_finished();
     };
 }

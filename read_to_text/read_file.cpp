@@ -36,19 +36,16 @@ main(int argc, char* argv[]){
         long fileSize = inputFile.tellg(); // Get current position (file size in bytes)
         inputFile.seekg(0, std::ios::beg);
         playback_header header;
-        unsigned char read_size;
-        inputFile.read(reinterpret_cast<char*>(&read_size), sizeof(unsigned char));
-        cout << "Read size: " << static_cast<int>(read_size) << endl;
-        if(read_size != sizeof(double)){
-            cerr << "WARNING! The size of double on this system is " << sizeof(double) << " bytes, but the expected value is: " << read_size << endl;
+        inputFile.read(reinterpret_cast<char*>(&header), sizeof(playback_header));
+        cout << "Read size: " << static_cast<int>(header.double_size) << endl;
+        if(header.double_size != sizeof(double)){
+            cerr << "WARNING! The size of double on this system is " << sizeof(double) << " bytes, but the expected value is: " << header.double_size << endl;
             return 1;
         }
-        double refresh_rate;
-        inputFile.read(reinterpret_cast<char*>(&refresh_rate), sizeof(double));
-        cout << "Refresh Rate: " << refresh_rate << endl;
+        cout << "Refresh Rate: " << header.refresh_rate << endl;
 
         // Read file in chunks, not all at once
-        long left_to_read = fileSize - sizeof(double) - sizeof(unsigned char);
+        long left_to_read = fileSize - sizeof(playback_header);
         long default_buffer_size = 16384;
         while(default_buffer_size < left_to_read){
             read_and_print(default_buffer_size, &inputFile);

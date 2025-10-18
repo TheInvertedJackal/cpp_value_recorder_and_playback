@@ -1,5 +1,6 @@
 #include "record_value.hpp"
 #include "../time_utils/nano_current.hpp"
+#include "../bin_struct/playback_bin.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -10,8 +11,10 @@ using namespace std;
 void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_recording, double* address_to_record){
     if (outputFile->is_open()){
         const char double_size = sizeof(double);
-        outputFile->write(reinterpret_cast<const char*>(&double_size), sizeof(const char));
-        outputFile->write(reinterpret_cast<const char*>(&sample_rate), sizeof(double));
+        playback_header header;
+        header.double_size = double_size;
+        header.refresh_rate = sample_rate;
+        outputFile->write(reinterpret_cast<const char*>(&header), sizeof(playback_header));
         outputFile->flush();
         int flush_every_this = static_cast<int>(500 / sample_rate); // Flush every half a second.
         long long count = 0;
@@ -33,6 +36,7 @@ void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_rec
             long long sleep_time = static_cast<long long>(sample_rate * timeutils::ns_in_ms) - work_time;
             if(sleep_time > 0) std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
         }
+        outputFile->flush();
         outputFile->close();
     } else {
         cerr << "There was an error opening the file to record values too." << endl;
@@ -55,12 +59,12 @@ RecordValue::~RecordValue(){
 void RecordValue::start_recording(){
     if(is_recording) return;
     is_recording = true;
-    work_thread = thread(thread_function, file_to_write_to, sample_rate, &is_recording, address_to_record);
+    thread work_thread = thread(thread_function, file_to_write_to, sample_rate, &is_recording, address_to_record);
+    work_thread.detach();
 }
 
 void RecordValue::stop_recording(){
     if(!is_recording) return;
     is_recording = false;
-    work_thread.join();
     delete file_to_write_to;
 }
