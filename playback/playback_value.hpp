@@ -9,11 +9,10 @@ namespace CPP_Value_Manipulation{
     struct thread_data {
         double* value_to_change;
         std::ifstream* file_to_read;
+        long file_size;
         double refresh_rate;
-        int total_steps;
         bool* playing;
         bool* finished_reading;
-        long file_size;
     };
     
     class PlaybackValue{
@@ -21,7 +20,6 @@ namespace CPP_Value_Manipulation{
             double* value_to_manipulate;
             std::thread work_thread;
             std::ifstream* file_to_read;
-            int easing_steps;
             bool is_playing;
             bool finished_reading;
             long file_size;
@@ -29,7 +27,7 @@ namespace CPP_Value_Manipulation{
             void load_file(std::string file_loc);
             thread_data* get_thread_package();
         public:
-            PlaybackValue(double* value, std::string record_file, int easing_steps = 0);
+            PlaybackValue(double* value, std::string record_file);
             ~PlaybackValue();
             // Starts the manipulation on a given address
             void start_playback();

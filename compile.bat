@@ -9,7 +9,14 @@ if "%1" == "record" (
 
 if "%1" == "read" (
     @echo on
-    g++ read\read_file.cpp -o read
+    g++ read_to_text\read_file.cpp -o read
+    @echo off
+    goto exit
+)
+
+if "%1" == "playback" (
+    @echo on
+    g++ time_utils\nano_current.cpp playback\playback_value.cpp playback.cpp -o playback
     @echo off
     goto exit
 )

@@ -7,8 +7,6 @@
 using namespace CPP_Value_Manipulation;
 using namespace std;
 
-const double ns_in_ms = 1000000;
-
 void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_recording, double* address_to_record){
     if (outputFile->is_open()){
         const char double_size = sizeof(double);
@@ -32,7 +30,7 @@ void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_rec
             // Sleep for remaining time if needed
             long long post_write = timeutils::get_current_nano_time();
             long long work_time = post_write - rec_time;
-            long long sleep_time = static_cast<long long>(sample_rate * ns_in_ms) - work_time;
+            long long sleep_time = static_cast<long long>(sample_rate * timeutils::ns_in_ms) - work_time;
             if(sleep_time > 0) std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
         }
         outputFile->close();
