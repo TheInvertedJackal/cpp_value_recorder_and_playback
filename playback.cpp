@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
         if(arg_choice == "time") choice = TIME;
     }
     double value = 0;
-    PlaybackValue player = PlaybackValue(&value, "./recording.bin");
+    PlaybackValue player = PlaybackValue(&value, file_to_read);
     bool playing = true;
     player.start_playback();
     long long start_time = timeutils::get_current_nano_time();
