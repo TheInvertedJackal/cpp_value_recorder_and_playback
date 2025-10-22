@@ -21,6 +21,6 @@ if "%1" == "playback" (
     goto exit
 )
 
-echo "The option %1 is not reconized!"
+echo "The option %1 is not recognized!"
 
 :exit

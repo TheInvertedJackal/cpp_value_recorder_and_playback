@@ -6,17 +6,44 @@
 using namespace CPP_Value_Manipulation;
 using namespace std;
 
-int main(){
+
+int main(int argc, char* argv[]){
+    double up_to_value = -1;
+    double playback_rate = 10;
+    string file_to_read;
+    if(argc >= 2){
+        file_to_read = string(argv[1]);
+    } else {
+        cerr << "You need to include the file name to record to!" << endl;
+        cerr << "record <file>" << endl;
+        return -1;
+    }
+    if(argc >= 3){
+        up_to_value = stod(argv[2]);
+        if(up_to_value <= 0){
+            cerr << "Value cannot be 0 or less! Leave blank for infinity." << endl;
+            cerr << "record <file> <to_value>" << endl;
+            return -1;
+        }
+    }
+    if(argc >= 4){
+        playback_rate = stod(argv[3]);
+        if(playback_rate <= 0){
+            cerr << "Playback cannot be 0 or less! Leave blank for 10ms." << endl;
+            cerr << "record <file> <to_value> <playback_rate>" << endl;
+            return -1;
+        }
+    }
     double value = 0;
-    RecordValue recorder = RecordValue(&value, 10, "./recording.bin");
+    RecordValue recorder = RecordValue(&value, playback_rate, file_to_read);
     recorder.start_recording();
     long long start_time = timeutils::get_current_nano_time();
-    while(value < 100000000){
+    while(value < up_to_value || up_to_value == -1){
         value += .1;
     }
     recorder.stop_recording();
     long long end_time = timeutils::get_current_nano_time();
     double total_time = (end_time - start_time * 1.0) / timeutils::ns_in_ms / 1000;
-    cout << "Run took: " << total_time << "s" << endl;
+    if(up_to_value != -1) cout << "Run took: " << total_time << "s" << endl;
     return 0;
 }
