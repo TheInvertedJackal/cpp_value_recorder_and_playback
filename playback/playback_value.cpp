@@ -46,7 +46,7 @@ void thread_function(thread_data* data){
     *(data->playing) = false;
 }
 
-PlaybackValue::PlaybackValue(double* value, std::string record_file){
+PlaybackValue::PlaybackValue(std::atomic<double>* value, std::string record_file){
     this->value_to_manipulate = value;
     this->is_playing = false;
     load_file(record_file);

@@ -3,11 +3,12 @@
 
 #include <string>
 #include <thread>
+#include <atomic>
 
 namespace CPP_Value_Manipulation{
 
     struct thread_data {
-        double* value_to_change;
+        std::atomic<double>* value_to_change;
         std::ifstream* file_to_read;
         long file_size;
         double refresh_rate;
@@ -17,7 +18,7 @@ namespace CPP_Value_Manipulation{
     
     class PlaybackValue{
         private:
-            double* value_to_manipulate;
+            std::atomic<double>* value_to_manipulate;
             std::ifstream* file_to_read;
             bool is_playing;
             bool finished_reading;
@@ -27,7 +28,7 @@ namespace CPP_Value_Manipulation{
             void load_file(std::string file_loc);
             thread_data* get_thread_package();
         public:
-            PlaybackValue(double* value, std::string record_file);
+            PlaybackValue(std::atomic<double>* value, std::string record_file);
             ~PlaybackValue();
             // Starts the manipulation on a given address
             void start_playback();

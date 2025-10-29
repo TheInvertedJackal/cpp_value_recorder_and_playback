@@ -8,7 +8,7 @@
 using namespace CPP_Value_Manipulation;
 using namespace std;
 
-void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_recording, double* address_to_record){
+void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_recording, std::atomic<double>* address_to_record){
     if (outputFile->is_open()){
         const char double_size = sizeof(double);
         playback_header header;
@@ -43,7 +43,7 @@ void thread_function(std::ofstream* outputFile, double sample_rate, bool* is_rec
     }
 }
 
-RecordValue::RecordValue(double* address_to_record, double record_interval, std::string record_file){
+RecordValue::RecordValue(std::atomic<double>* address_to_record, double record_interval, std::string record_file){
     if(address_to_record == nullptr) throw std::runtime_error("Cannot read from a null pointer!");
     if(record_interval < 0) throw std::runtime_error("Rate cannot be less than 0!");
     this->address_to_record = address_to_record;

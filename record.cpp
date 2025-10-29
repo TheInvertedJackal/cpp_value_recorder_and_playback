@@ -34,12 +34,14 @@ int main(int argc, char* argv[]){
             return -1;
         }
     }
-    double value = 0;
+    double true_value = 0;
+    std::atomic<double> value = 0;
     RecordValue recorder = RecordValue(&value, playback_rate, file_to_read);
     recorder.start_recording();
     long long start_time = timeutils::get_current_nano_time();
     while(value < up_to_value || up_to_value == -1){
-        value += .1;
+        true_value += .1;
+        value = true_value;
     }
     recorder.stop_recording();
     long long end_time = timeutils::get_current_nano_time();

@@ -4,8 +4,9 @@
 using namespace CPP_Value_Manipulation;
 
 int main(){
-    // 
-    double value = 0;
+    // Set value to read
+    double true_value = 0;
+    std::atomic<double> value = 0;
     double sample_rate = 10;
     RecordValue record_value = RecordValue(&value, sample_rate, "./example.bin");
     record_value.start_recording();
@@ -18,7 +19,8 @@ int main(){
     bool restart = true;
     while(true){
         // Do work
-
+        true_value += .1;
+        value = true_value; // Update manipulated value...
         // If we've reached the end of the recording...
         if(playback_value.is_finished()){
             // Should we restart?
